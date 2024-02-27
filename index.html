@@ -34,25 +34,34 @@
 </div>
 
 <script>
-  function convertToJSON() {
-    const csvInput = document.getElementById('csvInput').value;
-    const lines = csvInput.split('\n');
-    const jsonResult = [];
-    const addressCount = {};
-    let validLines = 0;
+ function convertToJSON() {
+  const csvInput = document.getElementById('csvInput').value;
+  const lines = csvInput.split('\n');
+  const jsonResult = [];
+  const addressCount = {};
+  let validLines = 0;
+  let invalidLines = []; // 新增数组用于存储不符合格式的行
 
-    lines.forEach(line => {
-      const parts = line.split('\t');
-      if (parts.length === 2 && /^0x[a-fA-F0-9]{40}$/.test(parts[0]) && !isNaN(parts[1])) {
-        jsonResult.push({ recipient: parts[0], tokenId: parseInt(parts[1], 10) });
-        addressCount[parts[0]] = (addressCount[parts[0]] || 0) + 1;
-        validLines++;
-      }
-    });
+  lines.forEach((line, index) => { // 现在我们也传递索引，用于显示行号
+    const parts = line.split('\t');
+    if (parts.length === 2 && /^0x[a-fA-F0-9]{40}$/.test(parts[0]) && !isNaN(parts[1])) {
+      jsonResult.push({ recipient: parts[0], tokenId: parseInt(parts[1], 10) });
+      addressCount[parts[0]] = (addressCount[parts[0]] || 0) + 1;
+      validLines++;
+    } else if (line.trim() !== '') { // 忽略空行
+      invalidLines.push(`Line ${index + 1}: ${line}`); // 保存不符合格式的行及其编号
+    }
+  });
 
-    document.getElementById('output').textContent = JSON.stringify(jsonResult, null, 2);
-    displayStatistics(validLines, addressCount);
+  if (invalidLines.length > 0) {
+    alert(`The following lines do not match the expected format:\n${invalidLines.join('\n')}`);
+    return; // 如果有不符合格式的行，显示警告后不继续执行
   }
+
+  document.getElementById('output').innerText = JSON.stringify(jsonResult, null, 2);
+  displayStatistics(validLines, addressCount);
+}
+
 
   function displayStatistics(validLines, addressCount) {
     const uniqueAddresses = Object.keys(addressCount).length;
