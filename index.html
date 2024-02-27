@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CSV to JSON Converter</title>
+<style>
+  .container {
+    margin: 20px;
+  }
+  textarea, #convertButton, #copyButton {
+    width: 100%;
+    margin-top: 10px;
+  }
+  textarea {
+    height: 100px;
+  }
+  .output-container, .stats-container {
+    background-color: #f4f4f4;
+    padding: 10px;
+    border: 1px solid #ddd;
+    max-height: 200px;
+    overflow-y: auto;
+    margin-top: 10px;
+  }
+  .stats-container {
+    max-height: 150px; /* Adjusted height for stats */
+  }
+  #copyButton {
+    margin-top: 0; /* Align button without additional top margin */
+    display: inline-block; /* To align with the label */
+    padding: 8px 15px; /* Adjusted to match Convert button */
+    cursor: pointer;
+    background-color: #4CAF50; /* Green background */
+    border: none;
+    color: white;
+    text-align: center;
+    text-decoration: none;
+    font-size: 16px;
+    border-radius: 4px;
+  }
+</style>
+</head>
+<body>
+<div class="container">
+  <h2>CSV to JSON Converter</h2>
+  <div>
+    <label for="csvInput">CSV Input:</label>
+    <textarea id="csvInput" placeholder="Enter CSV data here..."></textarea>
+  </div>
+  <button id="convertButton" onclick="convertCSVtoJSON()">Convert</button>
+  <div>
+    <h3 style="display: inline-block;">JSON Output:</h3>
+    <button id="copyButton" onclick="copyToClipboard()">Copy</button>
+  </div>
+  <div class="output-container">
+    <pre id="jsonOutput">{}</pre>
+  </div>
+  <div>
+    <h3>Statistics:</h3>
+    <div class="stats-container" id="stats">-</div>
+  </div>
+</div>
+
+<script>
+function convertCSVtoJSON() {
+  const csvInput = document.getElementById('csvInput').value;
+  const lines = csvInput.trim().split('\n');
+  const jsonOutput = [];
+  const recipientCount = {};
+
+  lines.forEach(line => {
+    const parts = line.split(/\s+/);
+    if (parts.length === 2 && /^0x[a-fA-F0-9]{40}$/.test(parts[0]) && !isNaN(parts[1])) {
+      const recipient = parts[0];
+      const tokenId = parseInt(parts[1], 10);
+      jsonOutput.push({ recipient, tokenId });
+      recipientCount[recipient] = (recipientCount[recipient] || 0) + 1;
+    }
+  });
+
+  document.getElementById('jsonOutput').textContent = JSON.stringify(jsonOutput, null, 2);
+
+  const totalLines = lines.length;
+  const uniqueRecipients = Object.keys(recipientCount).length;
+  let countsDisplay = `Total lines: ${totalLines}\nUnique recipients: ${uniqueRecipients}\nRecipient Counts:\n`;
+  for (const recipient in recipientCount) {
+    countsDisplay += `${recipient}: ${recipientCount[recipient]}\n`;
+  }
+
+  document.getElementById('stats').textContent = countsDisplay.trim(); // Trim the final newline for clean presentation
+}
+
+function copyToClipboard() {
+  const jsonOutput = document.getElementById('jsonOutput').textContent;
+  navigator.clipboard.writeText(jsonOutput).then(() => {
+    alert('JSON output copied to clipboard!');
+  }).catch(err => {
+    console.error('Failed to copy text: ', err);
+  });
+}
+</script>
+</body>
+</html>
