@@ -3,37 +3,31 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CSV Converter</title>
+<title>Token Converter</title>
 <link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div class="container">
   <div>
-    <input type="radio" id="erc20" name="tokenType" value="ERC20" onclick="changeTokenType('ERC20')">
-    <label for="erc20">ERC20</label>
-    <input type="radio" id="erc721" name="tokenType" value="ERC721" onclick="changeTokenType('ERC721')" checked>
-    <label for="erc721">ERC721</label>
+    <label for="tokenTypeSelect">Select Token Type:</label>
+    <select id="tokenTypeSelect">
+      <option value="ERC721">ERC721</option>
+      <option value="ERC20">ERC20</option>
+    </select>
   </div>
-  
-  <div class="tab">
-    <button class="tablinks" onclick="openTab(event, 'Convert')">Convert</button>
+  <h2>Token Converter</h2>
+  <div>
+    <h4>Input:</h4>
+    <textarea id="csvInput" placeholder="Enter data here..."></textarea>
+    <button onclick="convertToJSON()">Convert</button>
   </div>
-
-  <div id="Convert" class="tabcontent">
-    <h2>CSV Converter</h2>
-    <div>
-      <h4>CSV Input:</h4>
-      <textarea id="csvInput" placeholder="Enter CSV format data here..."></textarea>
-      <button onclick="convertToJSON()">Convert</button>
-    </div>
-    <div>
-      <h4>Output: <button class="copy-button" onclick="copyToClipboard()">Copy</button></h4>
-      <pre id="output"></pre>
-    </div>
-    <div>
-      <h4>Statistics:</h4>
-      <div id="statistics" class="stats"></div>
-    </div>
+  <div>
+    <h4>Output: <button class="copy-button" onclick="copyToClipboard()">Copy</button></h4>
+    <pre id="output"></pre>
+  </div>
+  <div>
+    <h4>Statistics:</h4>
+    <div id="statistics"></div>
   </div>
 </div>
 

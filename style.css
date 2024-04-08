@@ -6,9 +6,3 @@ textarea { height: 200px; }
 #statistics { height: 150px; overflow-y: auto; background-color: #f9f9f9; padding: 10px; border: 1px solid #ddd; }
 button { margin: 10px 0; }
 .copy-button { padding: 5px 10px; margin-left: 10px; }
-.tab { overflow: hidden; border: 1px solid #ccc; background-color: #f1f1f1; }
-.tab button { background-color: inherit; float: left; border: none; outline: none; cursor: pointer; padding: 14px 16px; transition: 0.3s; }
-.tab button:hover { background-color: #ddd; }
-.tab button.active { background-color: #ccc; }
-.tabcontent { display: none; padding: 6px 12px; border: 1px solid #ccc; border-top: none; }
-.stats { white-space: pre-line; }
