@@ -3,84 +3,40 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CSV to JSON Converter</title>
-<style>
-  body { font-family: Arial, sans-serif; }
-  .container { width: 80%; margin: auto; max-width: 1200px; }
-  textarea { width: 100%; height: 200px; }
-  #output { height: 200px; overflow-y: auto; background-color: #f0f0f0; padding: 10px; }
-  #statistics { height: 150px; overflow-y: auto; background-color: #f9f9f9; padding: 10px; border: 1px solid #ddd; }
-  button { margin: 10px 0; }
-  .copy-button { padding: 5px 10px; margin-left: 10px; }
-  .stats { white-space: pre-line; }
-</style>
+<title>CSV Converter</title>
+<link rel="stylesheet" href="style.css">
 </head>
 <body>
 <div class="container">
-  <h2>CSV to JSON Converter</h2>
   <div>
-    <h4>CSV Input:</h4>
-    <textarea id="csvInput" placeholder="Enter CSV format data here..."></textarea>
-    <button onclick="convertToJSON()">Convert</button>
+    <input type="radio" id="erc20" name="tokenType" value="ERC20" onclick="changeTokenType('ERC20')">
+    <label for="erc20">ERC20</label>
+    <input type="radio" id="erc721" name="tokenType" value="ERC721" onclick="changeTokenType('ERC721')" checked>
+    <label for="erc721">ERC721</label>
   </div>
-  <div>
-    <h4>JSON Output: <button class="copy-button" onclick="copyToClipboard()">Copy</button></h4>
-    <pre id="output"></pre>
+  
+  <div class="tab">
+    <button class="tablinks" onclick="openTab(event, 'Convert')">Convert</button>
   </div>
-  <div>
-    <h4>Statistics:</h4>
-    <div id="statistics" class="stats"></div>
+
+  <div id="Convert" class="tabcontent">
+    <h2>CSV Converter</h2>
+    <div>
+      <h4>CSV Input:</h4>
+      <textarea id="csvInput" placeholder="Enter CSV format data here..."></textarea>
+      <button onclick="convertToJSON()">Convert</button>
+    </div>
+    <div>
+      <h4>Output: <button class="copy-button" onclick="copyToClipboard()">Copy</button></h4>
+      <pre id="output"></pre>
+    </div>
+    <div>
+      <h4>Statistics:</h4>
+      <div id="statistics" class="stats"></div>
+    </div>
   </div>
 </div>
 
-<script>
- function convertToJSON() {
-  const csvInput = document.getElementById('csvInput').value;
-  const lines = csvInput.split('\n');
-  const jsonResult = [];
-  const addressCount = {};
-  let validLines = 0;
-  let invalidLines = []; // 新增数组用于存储不符合格式的行
-
-  lines.forEach((line, index) => { // 现在我们也传递索引，用于显示行号
-    const parts = line.split('\t');
-    if (parts.length === 2 && /^0x[a-fA-F0-9]{40}$/.test(parts[0]) && !isNaN(parts[1])) {
-      jsonResult.push({ recipient: parts[0], tokenId: parseInt(parts[1], 10) });
-      addressCount[parts[0]] = (addressCount[parts[0]] || 0) + 1;
-      validLines++;
-    } else if (line.trim() !== '') { // 忽略空行
-      invalidLines.push(`Line ${index + 1}: ${line}`); // 保存不符合格式的行及其编号
-    }
-  });
-
-  if (invalidLines.length > 0) {
-    alert(`The following lines do not match the expected format:\n${invalidLines.join('\n')}`);
-    return; // 如果有不符合格式的行，显示警告后不继续执行
-  }
-
-  document.getElementById('output').innerText = JSON.stringify(jsonResult, null, 2);
-  displayStatistics(validLines, addressCount);
-}
-
-
-  function displayStatistics(validLines, addressCount) {
-    const uniqueAddresses = Object.keys(addressCount).length;
-    let statsText = `Total lines: ${validLines}\n`;
-    statsText += `Unique recipients: ${uniqueAddresses}\nRecipient Counts:\n`;
-    for (const address in addressCount) {
-      statsText += `${address}: ${addressCount[address]}\n`;
-    }
-    document.getElementById('statistics').textContent = statsText;
-  }
-
-  function copyToClipboard() {
-    const outputText = document.getElementById('output').textContent;
-    navigator.clipboard.writeText(outputText).then(() => {
-      alert('Copied to clipboard');
-    }, (err) => {
-      alert('Error in copying text: ', err);
-    });
-  }
-</script>
+<script src="script.js"></script>
 </body>
 </html>
