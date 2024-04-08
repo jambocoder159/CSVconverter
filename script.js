@@ -10,17 +10,14 @@ function convertToJSON() {
   const jsonResult = [];
   const addressCount = {};
   let validLines = 0;
-  let invalidLines = [];
+  let invalidLines = []; // 用于存储不符合格式的行
 
   lines.forEach((line, index) => {
     const parts = line.split('\t');
-    if (currentTokenType === 'ERC721' && parts.length === 2 && /^0x[a-fA-F0-9]{40}$/.test(parts[0]) && !isNaN(parts[1])) {
-      jsonResult.push({ recipient: parts[0], tokenId: parseInt(parts[1], 10) });
+    if (parts.length === 2 && /^0x[a-fA-F0-9]{40}$/.test(parts[0])) {
+      const amount = BigInt(parts[1]) * BigInt(10**18); // 将数量乘以10^18
+      jsonResult.push({ recipient: parts[0], amount: amount.toString() }); // 使用BigInt处理大数
       addressCount[parts[0]] = (addressCount[parts[0]] || 0) + 1;
-      validLines++;
-    } else if (currentTokenType === 'ERC20' && parts.length === 2 && /^0x[a-fA-F0-9]{40}$/.test(parts[0]) && !isNaN(parts[1])) {
-      jsonResult.push({ recipient: parts[0], amount: parts[1] });
-      addressCount[parts[0]] = (addressCount[parts[0]] || 0) + parseFloat(parts[1]);
       validLines++;
     } else if (line.trim() !== '') {
       invalidLines.push(`Line ${index + 1}: ${line}`);
@@ -35,7 +32,63 @@ function convertToJSON() {
   document.getElementById('output').innerText = JSON.stringify(jsonResult, null, 2);
   displayStatistics(validLines, addressCount);
 }
-
+function convertToJSON() {
+    const csvInput = document.getElementById('csvInput').value;
+    const lines = csvInput.split('\n');
+    const jsonResult = [];
+    const addressCount = {};
+    let validLines = 0;
+    let invalidLines = []; // 用于存储不符合格式的行
+  
+    lines.forEach((line, index) => {
+      const parts = line.split('\t');
+      if (parts.length === 2 && /^0x[a-fA-F0-9]{40}$/.test(parts[0])) {
+        const amountInWei = convertToWei(parts[1]);
+        if (amountInWei !== null) {
+          jsonResult.push({ recipient: parts[0], amount: amountInWei });
+          addressCount[parts[0]] = (addressCount[parts[0]] || 0) + 1;
+          validLines++;
+        } else {
+          invalidLines.push(`Line ${index + 1}: ${line} (Invalid amount)`);
+        }
+      } else if (line.trim() !== '') {
+        invalidLines.push(`Line ${index + 1}: ${line} (Invalid format)`);
+      }
+    });
+  
+    if (invalidLines.length > 0) {
+      alert(`The following lines do not match the expected format or contain invalid amounts:\n${invalidLines.join('\n')}`);
+      return;
+    }
+  
+    document.getElementById('output').innerText = JSON.stringify(jsonResult, null, 2);
+    displayStatistics(validLines, addressCount);
+  }
+  
+  function convertToWei(amount) {
+    try {
+      const parsedAmount = parseFloat(amount);
+      if (isNaN(parsedAmount)) {
+        return null; // 如果输入不是数字，返回null
+      }
+      const amountInWei = BigInt(Math.floor(parsedAmount * 1e18)); // 转换为BigInt
+      return amountInWei.toString(); // 返回字符串表示的大整数
+    } catch (error) {
+      console.error("Conversion error:", error);
+      return null; // 转换失败返回null
+    }
+  }
+  
+  function displayStatistics(validLines, addressCount) {
+    const uniqueAddresses = Object.keys(addressCount).length;
+    let statsText = `Total valid lines processed: ${validLines}\n`;
+    statsText += `Unique addresses: ${uniqueAddresses}\nAddresses and their token counts:\n`;
+    for (const address in addressCount) {
+      statsText += `${address}: ${addressCount[address]}\n`;
+    }
+    document.getElementById('statistics').textContent = statsText;
+  }
+  
 function displayStatistics(validLines, addressCount) {
   const uniqueAddresses = Object.keys(addressCount).length;
   let statsText = `Total lines: ${validLines}\n`;
